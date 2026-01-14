@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <input onChange={(e) => setEmail(e.target.value)} value={email} />
+      <input onChange={(e) => setPassword(e.target.value)} value={password} />
+      <button
+        onClick={async () => {
+          const res = await fetch(
+            "https://fe-project-epigram-api.vercel.app/19-8/auth/signIn",
+            {
+              body: JSON.stringify({
+                email,
+                password,
+              }),
+            }
+          );
+          // 토큰 저장
+        }}
+      >
+        로그인
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default App;
