@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styles from "./Signup.module.css";
 
-const TEAM_ID = "4-8";
+const TEAM_ID = "19-8";
 const SIGN_UP_URL = `https://fe-project-epigram-api.vercel.app/${TEAM_ID}/auth/signUp`;
 
 const Signup = () => {

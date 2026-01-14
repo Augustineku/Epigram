@@ -9,6 +9,8 @@ import { createRoot } from "react-dom/client";
 import Login from "./Login.jsx";
 import Signup from "./Signup.jsx";
 import LandingPage from "./LandingPage.jsx";
+import CreateEpigram from "./CreateEpigram.jsx";
+import ListEpigrams from "./ListEpigrams.jsx";
 // import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -19,5 +21,9 @@ createRoot(document.getElementById("root")).render(
     <Signup />
     <br></br>
     <Login />
+    <br></br>
+    <CreateEpigram />
+    <br></br>
+    <ListEpigrams />
   </StrictMode>
 );

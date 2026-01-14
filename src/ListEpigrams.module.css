@@ -1,0 +1,97 @@
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: "Pretendard", sans-serif;
+}
+
+.container h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #1a1a1a;
+  border-left: 4px solid #1a1a1a;
+  padding-left: 15px;
+}
+
+/* 카드 그리드 레이아웃 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+/* 개별 에피그램 카드 */
+.card {
+  background-color: #ffffff;
+  border: 1px solid #f1f3f5;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+  border-color: #e9ecef;
+}
+
+/* 문장 본문 */
+.content {
+  font-size: 17px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 500;
+  word-break: keep-all; /* 한글 단어 단위 끊기 */
+}
+
+/* 저자 정보 */
+.author {
+  font-size: 14px;
+  color: #868e96;
+  text-align: right;
+  margin-bottom: 15px;
+  font-style: italic;
+}
+
+/* 태그 영역 */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid #f8f9fa;
+  padding-top: 15px;
+}
+
+.tags span {
+  font-size: 12px;
+  color: #5c7cfa;
+  background-color: #edf2ff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* 데이터가 없을 때 스타일 */
+.empty {
+  text-align: center;
+  padding: 100px 0;
+  color: #adb5bd;
+  font-size: 16px;
+}
+
+/* 반응형 처리 */
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .container h2 {
+    font-size: 19px;
+  }
+}

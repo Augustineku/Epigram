@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./LandingPage.module.css";
 
-const TEAM_ID = "4-8"; // 실제 본인의 팀 ID로 확인 필요
+const TEAM_ID = "19-8"; // 실제 본인의 팀 ID로 확인 필요
 const API_BASE_URL = `https://fe-project-epigram-api.vercel.app/${TEAM_ID}`;
 
 const LandingPage = () => {
