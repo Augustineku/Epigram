@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./Signup.module.css";
 
 const TEAM_ID = "19-8";
@@ -9,7 +9,6 @@ const Signup = () => {
     email: "",
     isEmailChecked: false,
     name: "",
-    isNameChecked: false,
     nickname: "",
     isNicknameChecked: false,
     password: "",
@@ -17,25 +16,20 @@ const Signup = () => {
   });
 
   const [validation, setValidation] = useState({
-    emailValid: true,
     passwordMatch: true,
     isSubmitting: false,
   });
 
-  // 입력값 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      // 값 변경 시 해당 항목의 중복확인 상태 초기화
+      // 값 변경 시 중복확인 상태 초기화 (다시 확인하도록 유도)
       [`is${name.charAt(0).toUpperCase() + name.slice(1)}Checked`]: false,
     }));
-    if (name === "email")
-      setValidation((prev) => ({ ...prev, emailValid: true }));
   };
 
-  // 비밀번호 일치 확인
   useEffect(() => {
     setValidation((prev) => ({
       ...prev,
@@ -47,14 +41,15 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (validation.isSubmitting) return;
 
-    // API가 요구하는 정확한 필드명으로 매칭
+    setValidation((prev) => ({ ...prev, isSubmitting: true }));
+
     const requestBody = {
       email: formData.email,
       nickname: formData.nickname,
       password: formData.password,
-      passwordConfirmation: formData.confirmPassword, // 필드명 수정 필수!
-      // 'name' 필드는 서버에서 허용하지 않으므로 삭제합니다.
+      passwordConfirmation: formData.confirmPassword,
     };
 
     try {
@@ -67,25 +62,29 @@ const Signup = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert("회원가입 성공!");
-        window.location.href = "/login";
+        alert("회원가입이 완료되었습니다!");
+        window.location.href = "/"; // 홈 화면으로 이동
       } else {
-        // 이제 상세 에러 메시지가 출력됩니다.
-        console.error("서버 에러 상세:", data.details);
-        alert(`회원가입 실패: ${data.message}`);
+        // 닉네임 중복 시 500 에러 처리
+        if (response.status === 500) {
+          alert("이미 사용 중인 닉네임이거나 서버 오류가 발생했습니다.");
+        } else {
+          alert(`실패: ${data.message || "입력 정보를 다시 확인해주세요."}`);
+        }
       }
     } catch (error) {
       alert("네트워크 오류가 발생했습니다.");
+    } finally {
+      setValidation((prev) => ({ ...prev, isSubmitting: false }));
     }
   };
 
   const isFormValid =
     formData.email &&
-    formData.isEmailChecked &&
     formData.nickname &&
-    formData.isNicknameChecked &&
     formData.name &&
     formData.password &&
+    formData.confirmPassword &&
     validation.passwordMatch &&
     !validation.isSubmitting;
 
@@ -97,48 +96,14 @@ const Signup = () => {
           {/* Email */}
           <div className={styles.inputGroup}>
             <label>이메일</label>
-            <div className={styles.inputWithButton}>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="이메일"
-                required
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData((p) => ({ ...p, isEmailChecked: true }))
-                }
-                className={formData.isEmailChecked ? styles.checked : ""}
-              >
-                {formData.isEmailChecked ? "확인됨" : "중복확인"}
-              </button>
-            </div>
-          </div>
-
-          {/* Nickname */}
-          <div className={styles.inputGroup}>
-            <label>닉네임</label>
-            <div className={styles.inputWithButton}>
-              <input
-                type="text"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="닉네임"
-                required
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData((p) => ({ ...p, isNicknameChecked: true }))
-                }
-              >
-                {formData.isNicknameChecked ? "확인됨" : "중복확인"}
-              </button>
-            </div>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="이메일을 입력해 주세요"
+              required
+            />
           </div>
 
           {/* Name */}
@@ -149,7 +114,20 @@ const Signup = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="이름"
+              placeholder="이름을 입력해 주세요"
+              required
+            />
+          </div>
+
+          {/* Nickname */}
+          <div className={styles.inputGroup}>
+            <label>닉네임</label>
+            <input
+              type="text"
+              name="nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+              placeholder="닉네임을 입력해 주세요"
               required
             />
           </div>
@@ -167,6 +145,7 @@ const Signup = () => {
             />
           </div>
 
+          {/* Password Confirm */}
           <div className={styles.inputGroup}>
             <label>비밀번호 확인</label>
             <input
@@ -177,7 +156,7 @@ const Signup = () => {
               placeholder="비밀번호 확인"
               required
             />
-            {!validation.passwordMatch && (
+            {!validation.passwordMatch && formData.confirmPassword && (
               <p className={styles.error}>비밀번호가 일치하지 않습니다.</p>
             )}
           </div>
@@ -187,7 +166,7 @@ const Signup = () => {
             className={styles.submitButton}
             disabled={!isFormValid}
           >
-            회원가입
+            {validation.isSubmitting ? "가입 중..." : "가입하기"}
           </button>
         </form>
       </div>

@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from "react";
 import styles from "./LandingPage.module.css";
 
-const TEAM_ID = "19-8"; // 실제 본인의 팀 ID로 확인 필요
+const TEAM_ID = "19-8";
 const API_BASE_URL = `https://fe-project-epigram-api.vercel.app/${TEAM_ID}`;
 
 const LandingPage = () => {
   const [epigrams, setEpigrams] = useState([]);
+  const [user, setUser] = useState(null);
 
-  // API에서 실제 사용자들이 등록한 에피그램 목록 가져오기 (이미지 4 연동)
   useEffect(() => {
+    // 로컬 스토리지에서 유저 정보 가져오기 (로그인 상태 확인용)
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+
     const fetchEpigrams = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/epigrams?limit=3`);
@@ -23,8 +29,46 @@ const LandingPage = () => {
     fetchEpigrams();
   }, []);
 
+  const handleLogoClick = () => {
+    window.location.href = "/"; // "/" 페이지로 이동하며 새로고침
+  };
+
+  const handleFeedClick = () => {
+    window.location.href = "/feed"; // 피드 페이지 이동
+  };
+
   return (
     <div className={styles.container}>
+      {/* 상단 네비게이션 바 (Navigation bar.png 반영) */}
+      <nav className={styles.navbar}>
+        <div className={styles.navLeft}>
+          <div className={styles.navLogo} onClick={handleLogoClick}>
+            <span className={styles.logoIcon}>📚</span>
+            <span className={styles.logoText}>Epigram</span>
+          </div>
+          <span className={styles.navItem} onClick={handleFeedClick}>
+            피드
+          </span>
+        </div>
+        <div className={styles.navRight}>
+          {user ? (
+            <div className={styles.userProfile}>
+              <div className={styles.profileCircle}>👤</div>
+              <span className={styles.userName}>
+                {user.nickname || "김코드"}
+              </span>
+            </div>
+          ) : (
+            <span
+              className={styles.navItem}
+              onClick={() => (window.location.href = "/login")}
+            >
+              로그인
+            </span>
+          )}
+        </div>
+      </nav>
+
       {/* 섹션 1: 로고 (Frame 59) */}
       <section className={styles.logoSection}>
         <div className={styles.centerLogo}>
@@ -33,7 +77,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* 섹션 2: 메인 타이틀 (Frame 2609425) */}
+      {/* ... 이하 기존 섹션 2 ~ 6 동일 ... */}
       <section className={styles.heroSection}>
         <h2 className={styles.heroTitle}>
           나만 갖고 있기엔
