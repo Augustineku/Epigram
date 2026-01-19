@@ -7,45 +7,12 @@ const SIGN_IN_URL = `https://fe-project-epigram-api.vercel.app/${TEAM_ID}/auth/s
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-
-  // 이메일 형식 체크 함수
-  const validateEmailFormat = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  // 이메일 Blur 핸들러
-  const handleEmailBlur = () => {
-    let message = "";
-    if (!email.trim()) {
-      message = "이메일은 필수 입력입니다.";
-    } else if (!validateEmailFormat(email)) {
-      message = "이메일 형식으로 작성해 주세요.";
-    }
-    setErrors((prev) => ({ ...prev, email: message }));
-  };
-
-  // 비밀번호 Blur 핸들러
-  const handlePasswordBlur = () => {
-    let message = "";
-    if (!password.trim()) {
-      message = "비밀번호는 필수 입력입니다.";
-    }
-    setErrors((prev) => ({ ...prev, password: message }));
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    // 최종 전송 전 검증
-    if (!email || !password || errors.email || errors.password) {
-      handleEmailBlur();
-      handlePasswordBlur();
-      return;
-    }
-
     setLoading(true);
+
     try {
       const response = await fetch(SIGN_IN_URL, {
         method: "POST",
@@ -56,12 +23,27 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+        // [중요 수정] API마다 응답 구조가 다르므로 두 가지 경로를 모두 체크합니다.
+        // data.accessToken 또는 data.data.accessToken
+        const token = data.accessToken || (data.data && data.data.accessToken);
+        const refreshToken =
+          data.refreshToken || (data.data && data.data.refreshToken);
+        const userData = data.user || (data.data && data.data.user);
 
-        alert("반갑습니다!");
-        window.location.href = "/"; // 랜딩 페이지로 이동
+        if (token) {
+          localStorage.setItem("accessToken", token);
+          if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+          if (userData) localStorage.setItem("user", JSON.stringify(userData));
+
+          alert("반갑습니다!");
+          window.location.href = "/";
+        } else {
+          // 토큰이 undefined로 저장되는 것을 방지합니다.
+          console.error("Token not found in response:", data);
+          alert(
+            "로그인 성공했으나 인증 토큰을 받지 못했습니다. 서버 응답을 확인하세요."
+          );
+        }
       } else {
         alert(data.message || "로그인 정보가 올바르지 않습니다.");
       }
@@ -73,80 +55,47 @@ const Login = () => {
   };
 
   return (
-    <div className={styles.wrapper}>
-      {/* 상단 네비게이션 바 */}
-      <nav className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <div
-            className={styles.navLogo}
-            onClick={() => (window.location.href = "/")}
-          >
-            <span className={styles.logoIcon}>📚</span>
-            <span className={styles.logoText}>Epigram</span>
+    <div className={styles.loginContainer}>
+      <div className={styles.loginCard}>
+        <h1
+          className={styles.logo}
+          onClick={() => (window.location.href = "/")}
+          style={{ cursor: "pointer" }}
+        >
+          에피그램
+        </h1>
+        <form onSubmit={handleLogin} className={styles.loginForm}>
+          <div className={styles.inputGroup}>
+            <label>이메일</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="이메일을 입력해 주세요"
+              required
+            />
           </div>
-          <span
-            className={styles.navItem}
-            onClick={() => (window.location.href = "/feed")}
+          <div className={styles.inputGroup}>
+            <label>비밀번호</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="비밀번호를 입력해 주세요"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className={styles.submitButton}
+            disabled={loading}
           >
-            피드
-          </span>
-        </div>
-        <div className={styles.navRight}>
-          <span
-            className={styles.navItem}
-            onClick={() => (window.location.href = "/login")}
-          >
-            로그인
-          </span>
-        </div>
-      </nav>
-
-      <div className={styles.loginContainer}>
-        <div className={styles.loginCard}>
-          <h1 className={styles.logo}>에피그램</h1>
-          <form onSubmit={handleLogin} className={styles.loginForm}>
-            <div className={styles.inputGroup}>
-              <label>이메일</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={handleEmailBlur}
-                placeholder="이메일을 입력해 주세요"
-                className={errors.email ? styles.inputError : ""}
-              />
-              {errors.email && (
-                <p className={styles.errorMessage}>{errors.email}</p>
-              )}
-            </div>
-
-            <div className={styles.inputGroup}>
-              <label>비밀번호</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onBlur={handlePasswordBlur}
-                placeholder="비밀번호를 입력해 주세요"
-                className={errors.password ? styles.inputError : ""}
-              />
-              {errors.password && (
-                <p className={styles.errorMessage}>{errors.password}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className={styles.submitButton}
-              disabled={loading}
-            >
-              {loading ? "로그인 중..." : "로그인"}
-            </button>
-          </form>
-          <p className={styles.footerText}>
-            회원이 아니신가요? <a href="/signup">회원가입하기</a>
-          </p>
-        </div>
+            {loading ? "로그인 중..." : "로그인"}
+          </button>
+        </form>
+        <p className={styles.footerText}>
+          회원이 아니신가요? <a href="/signup">회원가입하기</a>
+        </p>
       </div>
     </div>
   );
